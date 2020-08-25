@@ -1,0 +1,29 @@
+
+<form action="{{ url }}" method="{{ verb }}" class="parent-content">
+  {% csrf_token %}
+  {{ note_form.non_field_errors }}
+  <div class="note-header">
+    {{ note_form.title.errors }}
+    {{ note_form.title }}
+  </div>
+
+  <table>
+    {% for paragraph_form in paragraphs_form_set %}
+      <tr>
+       <td class="description">
+          {{ paragraph_form.description }}
+        </td>
+        <td class="content">
+          {{ paragraph_form.content }}
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <div class="green section">
+    {{ note_form.summany.errors }}
+    {{ note_form.summary}}
+    <input type="submit" value="Guardar nota"/>
+  </div>
+</form>
+

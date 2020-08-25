@@ -1,0 +1,8 @@
+*.pyc
+*__pycache__*
+geckodriver.log
+.env
+assets/bundles/
+node_modules
+webpack-stats.json
+.notes

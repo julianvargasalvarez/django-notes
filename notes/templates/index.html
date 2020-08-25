@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+  <a href='/notes/new/'>Nueva nota</a>
+  {% if not notes %}
+  No existen notas
+  {% endif %}
+  <ul>
+  {% for note in notes %}
+      <li>{{ note.title }} | <a href="/notes/{{ note.id }}/edit">edit</a></li>
+  {% endfor %}
+  </ul>
+  <a  href="#" data-controller="index" data-action="click->index#increment" data-count="{{ count }}"
+  >Increment {{ count }}</a>
+{% endblock %}

@@ -1,0 +1,5 @@
+if [ $(ps aux | grep Xvfb | grep -v grep | wc -l) = "0" ]; then
+  Xvfb :10 -ac &
+fi
+
+export DISPLAY=:10

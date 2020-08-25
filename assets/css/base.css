@@ -1,0 +1,84 @@
+body {
+  font-family:system-ui, sans-serif;
+  font-size: 24px;
+}
+
+.parent {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.section {
+  font-size: 1.5rem;
+  padding: 1rem;
+}
+
+.blue {
+  background-color: hsl(187deg 61% 79%);
+  border: 1px solid hsl(187deg 54% 68%);
+}
+
+.coral {
+  background-color: hsl(23deg 83% 82%);
+  border: 1px solid hsl(23deg 99% 75%);
+}
+
+.purple {
+  background-color: hsl(283deg 24% 86%);
+  border: 1px solid hsl(283deg 43% 80%);
+}
+
+.parent-contentc {
+  display: grid;
+  grid-template: auto 1fr auto / auto 1fr auto;
+}
+  
+.note-header {
+  padding: 2rem;
+  grid-column: 1 / 4;
+}
+
+input, textarea {
+  background-color: hsl(187deg 54% 68%);
+  border: none;
+}
+
+.note-header input {
+  font-size: 30px;
+  width: 100%;
+  padding: 9px 5px;
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  padding: 0;
+}
+
+tr {
+  display: block;
+  width: 100%;
+}
+
+td {
+  vertical-align: top;
+  padding: 0;
+}
+
+td input, td textarea {
+  font-size: 16px;
+  width: 100%;
+}
+
+td.description {
+  width: 30%;
+}
+
+td.content{
+  width: 70%;
+}
+
+td.description input {
+  text-align: right;
+  font-style: italic;
+}
