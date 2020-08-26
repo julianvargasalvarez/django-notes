@@ -32,7 +32,8 @@ def create(request):
     if note.is_valid():
         note.save()
 
-        ParagraphFormSet = inlineformset_factory(Note, Paragraph, fields=('description', 'content',),  extra=3, can_delete=False)
+        ParagraphFormSet = inlineformset_factory(Note, Paragraph, fields=('description', 'content',),)
+        print(request.POST)
         paragraphs_form_set = ParagraphFormSet(request.POST, instance=note.instance)
         if paragraphs_form_set.is_valid():
             paragraphs_form_set.save()
