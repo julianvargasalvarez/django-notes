@@ -2,6 +2,7 @@ from django.views.generic.base import TemplateView
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -15,7 +16,7 @@ from notes.serializers import NoteSerializer
 
 import time
 
-class NotesListView(ListView):
+class NotesListView(LoginRequiredMixin, ListView):
     template_name = 'index.html'
     model = Note
     context_object_name = 'note'

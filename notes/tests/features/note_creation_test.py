@@ -20,6 +20,11 @@ class NoteCreationTest(LiveServerTestCase):
         user = User.objects.create_user('elusuario', 'myemail@mail.com', '12345678')
         user.save()
 
+        # Notes creatin requires user to login
+        visit(self, "/notes/")
+        print(self.selenium.current_url)
+        self.assertTrue("/accounts/login" in self.selenium.current_url)
+
         login(self, user)
 
         visit(self, "/notes/")
