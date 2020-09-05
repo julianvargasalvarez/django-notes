@@ -21,18 +21,18 @@ class NoteCreationTest(LiveServerTestCase):
         user.save()
 
         # Notes creatin requires user to login
-        visit(self, "/notes/")
-        print(self.selenium.current_url)
+        visit(self, reverse("index"))
         self.assertTrue("/accounts/login" in self.selenium.current_url)
 
         login(self, user)
 
-        visit(self, "/notes/")
+        visit(self, reverse("index"))
         body = self.selenium.find_element_by_tag_name('body')
         self.assertTrue(has_content(body, "No existen notas"))
 
         click_on(body, "Nueva nota")
 
+        # Content for the new note
         body = self.selenium.find_element_by_tag_name('body')
         fill_in(body, "title", "Pisos termicos")
         fill_in(body, "paragraphs-0-description", "Distintos tipos de cultivos")
@@ -46,10 +46,28 @@ class NoteCreationTest(LiveServerTestCase):
         body = self.selenium.find_element_by_tag_name('body')
         self.assertTrue(has_content(body, "Nota guardada"))
         note = Note.objects.latest('id')
-        self.assertTrue(reverse('edit_note', args=[note.id]) in self.selenium.current_url)
+        self.assertTrue(reverse('update', args=[note.id]) in self.selenium.current_url)
         self.assertEqual(3, note.paragraphs.count())
 
-        visit(self, "/notes/")
+        # Editing a note
         body = self.selenium.find_element_by_tag_name('body')
-        self.assertTrue(has_content(body, "Pisos termicos"))
+        fill_in(body, "title", "Pisos termicos editados")
+        fill_in(body, "paragraphs-0-description", "Distintos tipos de cultivos editados")
+        fill_in(body, "paragraphs-0-content", "se clasifican segun la altura sobre el nivel del mar editados")
+        fill_in(body, "paragraphs-1-content", "los cultivos se producen segun la temperatura que se precesnta editados")
+        fill_in(body, "paragraphs-2-content", "desiertos, llanos, paramos editados")
+        fill_in(body, "paragraphs-3-description", "Importancia para el mercado")
+        fill_in(body, "paragraphs-3-content", "Segun los cultivos se puede comercializar lo que se produce")
+        fill_in(body, "summary", "Los pisos termicos permiten distintos tipos de cultivo segun la tepmeparuta editados")
+
+        click_on(body, "Guardar nota")
+
+        body = self.selenium.find_element_by_tag_name('body')
+        note = Note.objects.latest('id')
+        self.assertEqual(4, note.paragraphs.count())
+
+        # When returning to the index page the new note should be listed
+        visit(self, reverse("index"))
+        body = self.selenium.find_element_by_tag_name('body')
+        self.assertTrue(has_content(body, "Pisos termicos editados"))
         self.assertFalse(has_content(body, "No existen notas"))

@@ -1,20 +1,24 @@
-
-<form action="{{ url }}" method="{{ verb }}" class="parent-content">
+<form method="post" class="parent-content">
   {% csrf_token %}
-  {{ note_form.non_field_errors }}
+  {{ form.non_field_errors }}
   <div class="note-header">
-    {{ note_form.title.errors }}
-    {{ note_form.title }}
+    {{ form.title.errors }}
+    {{ form.title }}
   </div>
 
   <table>
     {{ paragraphs_form_set.management_form }}
     {% for paragraph_form in paragraphs_form_set %}
+      {% for hidden in paragraph_form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
       <tr>
        <td class="description">
+          {{ paragraph_form.description.errors }}
           {{ paragraph_form.description }}
         </td>
         <td class="content">
+          {{ paragraph_form.content.errors }}
           {{ paragraph_form.content }}
         </td>
       </tr>
@@ -22,8 +26,8 @@
   </table>
 
   <div class="green section">
-    {{ note_form.summany.errors }}
-    {{ note_form.summary}}
+    {{ form.summany.errors }}
+    {{ form.summary}}
     <input type="submit" value="Guardar nota"/>
   </div>
 </form>

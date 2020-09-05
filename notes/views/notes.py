@@ -1,18 +1,18 @@
-from django.views.generic.base import TemplateView
+from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.forms import inlineformset_factory
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.forms import inlineformset_factory
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.urls import reverse_lazy
+from django.views.generic.base import TemplateView
 from django.views.decorators.http import require_POST, require_GET, require_http_methods
-from django.views.generic import ListView
+from django.views.generic import ListView, CreateView, UpdateView
 
 from notes.forms import NoteForm, ParagraphForm
 from notes.models import Note, Paragraph
 from notes.serializers import NoteSerializer
-
 
 import time
 
@@ -28,51 +28,76 @@ class NotesListView(LoginRequiredMixin, ListView):
         return context
 
 
-def create(request):
-    note = NoteForm(request.POST)
-    if note.is_valid():
-        note.save()
+class NoteCreateView(LoginRequiredMixin, CreateView):
+    model = Note
+    template_name = 'new.html'
+    form_class = NoteForm
 
-        ParagraphFormSet = inlineformset_factory(Note, Paragraph, fields=('description', 'content',),)
-        paragraphs_form_set = ParagraphFormSet(request.POST, instance=note.instance)
+    def get_success_url(self):
+        return reverse_lazy('update', kwargs={'pk': self.object.pk})
+
+    """def ___form_valid(self, form):
+        #note.save()
+
+        ParagraphFormSet = inlineformset_factory(Note, Paragraph, fields=('description', 'content',), extra=3, can_delete=False)
+        paragraphs_form_set = ParagraphFormSet(self.request.POST, instance=note.instance)
         if paragraphs_form_set.is_valid():
             paragraphs_form_set.save()
-            messages.add_message(request, messages.INFO, "Nota guardada")
         else:
             print(paragraphs_form_set.errors)
-        return redirect(reverse('edit_note', args=[note.instance.id]))
-    else:
-        return render(request, 'new.html', context={'note':note})
+        return super().form_valid(form)
+    """
 
-def new(request):
-    time.sleep(2)
-    note_form = NoteForm()
-    ParagraphFormSet = inlineformset_factory(Note, Paragraph, fields=('description', 'content',),  extra=3, can_delete=False)
-    paragraphs_form_set = ParagraphFormSet()
-    return render(request, 'new.html',
-        context={'note_form':note_form,
-            'paragraphs_form_set':paragraphs_form_set,
-            'url': '/notes/create/',
-            'verb':'post'})
+    def get_context_data(self, **kwargs):
+        ParagraphFormSet = inlineformset_factory(Note, Paragraph, fields=('description', 'content',), extra=3, can_delete=False)
+        data = super(NoteCreateView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            data['paragraphs_form_set'] = ParagraphFormSet(self.request.POST)
+        else:
+            data['paragraphs_form_set'] = ParagraphFormSet()
+        return data
 
-def edit(request, note_id):
-    note_form = NoteForm(instance=Note.objects.get(pk=note_id))
-    ParagraphFormSet = inlineformset_factory(Note, Paragraph, form=ParagraphForm, fields=('description', 'content',),  extra=3, can_delete=False)
-    paragraphs_form_set = ParagraphFormSet(instance=note_form.instance)
-    return render(request, 'edit.html',
-        context={'note_form':note_form,
-            'paragraphs_form_set':paragraphs_form_set,
-            'url':'/notes/'+str(note_id)+'/update/', 'verb':'post'})
+    def form_valid(self, form):
+        context = self.get_context_data()
+        paragraphs = context['paragraphs_form_set']
 
-@require_GET
-def show(request, note_id):
-    return HttpResponse(note_id)
+        with transaction.atomic():
+            self.object = form.save()
 
-def update(request, note_id):
-    note_form = NoteForm(request.POST, instance=Note.objects.get(pk=note_id))
-    if note_form.is_valid():
-        note_form.save()
-        return redirect('index')
-    else:
-        return render(request, 'edit.html', context={'note_form':note_form, 'url':'/notes/'+str(note_id)+'/update/', 'verb':'post'})
+            if paragraphs.is_valid():
+                paragraphs.instance = self.object
+                paragraphs.save()
+                messages.add_message(self.request, messages.INFO, "Nota guardada")
 
+        return super(NoteCreateView, self).form_valid(form)
+
+class NoteUpdateView(LoginRequiredMixin, UpdateView):
+    model = Note
+    form_class = NoteForm
+    template_name = 'update.html'
+
+    def get_context_data(self, **kwargs):
+        ParagraphFormSet = inlineformset_factory(Note, Paragraph, fields=('description', 'content',), extra=3, can_delete=False)
+        data = super(NoteUpdateView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            data['paragraphs_form_set'] = ParagraphFormSet(self.request.POST, instance=self.object)
+        else:
+            data['paragraphs_form_set'] = ParagraphFormSet(instance=self.object)
+        return data
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        paragraphs = context['paragraphs_form_set']
+
+        with transaction.atomic():
+            self.object = form.save()
+            if paragraphs.is_valid():
+                paragraphs.instance = self.object
+                paragraphs.save()
+                messages.add_message(self.request, messages.INFO, "Nota guardada")
+
+        return super(NoteUpdateView, self).form_valid(form)
+
+    def get_success_url(self):
+        self.success_url = reverse_lazy('update', kwargs={'pk': self.object.pk})
+        return self.success_url
