@@ -1,0 +1,6 @@
+{{ note.title }}
+{% for paragraph in note.paragraphs.all %}
+  {{ paragraph.description }}
+  {{ paragraph.content }}
+{% endfor %}
+{{ note.summary }}

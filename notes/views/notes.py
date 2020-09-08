@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic.base import TemplateView
 from django.views.decorators.http import require_POST, require_GET, require_http_methods
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
 
 from notes.forms import NoteForm, ParagraphForm
 from notes.models import Note, Paragraph
@@ -35,18 +35,6 @@ class NoteCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy('update', kwargs={'pk': self.object.pk})
-
-    """def ___form_valid(self, form):
-        #note.save()
-
-        ParagraphFormSet = inlineformset_factory(Note, Paragraph, fields=('description', 'content',), extra=3, can_delete=False)
-        paragraphs_form_set = ParagraphFormSet(self.request.POST, instance=note.instance)
-        if paragraphs_form_set.is_valid():
-            paragraphs_form_set.save()
-        else:
-            print(paragraphs_form_set.errors)
-        return super().form_valid(form)
-    """
 
     def get_context_data(self, **kwargs):
         ParagraphFormSet = inlineformset_factory(Note, Paragraph, fields=('description', 'content',), extra=3, can_delete=False)
@@ -101,3 +89,10 @@ class NoteUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         self.success_url = reverse_lazy('update', kwargs={'pk': self.object.pk})
         return self.success_url
+
+class NoteDetailView(DetailView):
+    model = Note
+    template_name = 'show.html'
+    slug_url_kwarg = 'slug'
+    slug_field = 'slug'
+    context_object_name = 'note'

@@ -1,6 +1,6 @@
 from django.test import LiveServerTestCase
 from selenium.webdriver.firefox.webdriver import WebDriver
-from notes.models import Note
+from notes.models import Note, Paragraph
 from notes.tests.selenium_helpers import visit, fill_in, submit, click_on, submit, has_content, login, select_option
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -71,3 +71,24 @@ class NoteCreationTest(LiveServerTestCase):
         body = self.selenium.find_element_by_tag_name('body')
         self.assertTrue(has_content(body, "Pisos termicos editados"))
         self.assertFalse(has_content(body, "No existen notas"))
+
+    def test_a_user_opens_an_existing_note_for_printing_or_sharing(self):
+        """ An existing note can be open in a tab for printing or sharing via url.
+            Viewing does not require login and the url contains a slug instead of the note id.
+        """
+        note = Note(title="Pisos termicos", summary="Los pisos termicos permiten distintos tipos de cultivo segun la temperatura")
+        note.save()
+
+        Paragraph(
+            description="Distintos tipos de cultivos",
+            content="se clasifican segun la altura sobre el nivel del mar editados",
+            note=note
+        ).save()
+
+        visit(self, reverse("show", kwargs={'slug': note.slug}))
+
+        body = self.selenium.find_element_by_tag_name('body')
+        self.assertTrue(has_content(body, "Pisos termicos"))
+        self.assertTrue(has_content(body, "Distintos tipos de cultivos"))
+        self.assertTrue(has_content(body, "se clasifican segun la altura sobre el nivel del mar editados"))
+        self.assertTrue(has_content(body, "Los pisos termicos permiten distintos tipos de cultivo segun la temperatura"))

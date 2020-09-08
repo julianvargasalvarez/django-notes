@@ -6,5 +6,6 @@ urlpatterns = [
     path('', notes.NotesListView.as_view(), name='index'),
     path('create/', notes.NoteCreateView.as_view(), name='create'),
     path('<int:pk>/update', notes.NoteUpdateView.as_view(), name='update'),
+    path('<slug:slug>', notes.NoteDetailView.as_view(), name='show'),
 
 ]
